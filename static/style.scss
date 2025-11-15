@@ -1,0 +1,112 @@
+@use "../node_modules/@picocss/pico/scss/pico" with ($theme-color: "pumpkin",
+  $modules: ("themes/default": true,
+    "layout/document": true,
+    "layout/landmarks": true,
+    "layout/container": true,
+    "layout/section": true,
+    "layout/grid": true,
+    "layout/overflow-auto": false,
+    "content/link": true,
+    "content/typography": true,
+    "content/embedded": false,
+    "content/button": false,
+    "content/table": false,
+    "content/code": true,
+    "content/figure": false,
+    "content/misc": false,
+    "forms/basics": false,
+    "forms/checkbox-radio-switch": false,
+    "forms/input-color": false,
+    "forms/input-date": false,
+    "forms/input-file": false,
+    "forms/input-range": false,
+    "forms/input-search": false,
+    "components/accordion": false,
+    "components/card": true,
+    "components/dropdown": false,
+    "components/group": false,
+    "components/loading": false,
+    "components/modal": false,
+    "components/nav": true,
+    "components/progress": false,
+    "components/tooltip": false,
+    "utilities/accessibility": false,
+    "utilities/reduce-motion": false));
+
+@use "../node_modules/@picocss/pico/scss/colors/utilities" with ($palette: ("color-families": (green, amber, red)),
+  $utilities: ("background-colors": false));
+
+.alert-container {
+  position: fixed;
+  bottom: 0;
+  margin: 0;
+  border-radius: 0;
+  max-height: 80vh;
+  overflow: auto;
+  width: 100%;
+
+  &:has(ol:empty) {
+    display: none;
+  }
+
+  ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    >* {
+      padding: calc(var(--pico-spacing) * 0.5);
+      border-radius: var(--pico-border-radius);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--background-color);
+
+      p {
+        margin: 0;
+        color: var(--color);
+      }
+
+      >button {
+        content: "";
+        width: var(--pico-spacing);
+        height: var(--pico-spacing);
+        background-color: var(--color);
+        mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'%3E%3C/line%3E%3Cline x1='6' y1='6' x2='18' y2='18'%3E%3C/line%3E%3C/svg%3E");
+        mask-size: contain;
+        mask-repeat: no-repeat;
+        mask-position: center;
+        cursor: pointer;
+
+        &:hover {
+          background-color: var(--color-hover);
+        }
+
+        &:active {
+          background-color: var(--color-active);
+        }
+      }
+    }
+
+    >.success {
+      --background-color: var(--pico-color-green-50);
+      --color: var(--pico-color-green-800);
+      --color-hover: var(--pico-color-green-600);
+      --color-active: var(--pico-color-green-950);
+    }
+
+    >.warning {
+      --background-color: var(--pico-color-amber-100);
+      --color: var(--pico-color-amber-800);
+      --color-hover: var(--pico-color-amber-600);
+      --color-active: var(--pico-color-amber-950);
+    }
+
+    >.error {
+      --background-color: var(--pico-color-red-100);
+      --color: var(--pico-color-red-800);
+      --color-hover: var(--pico-color-red-600);
+      --color-active: var(--pico-color-red-950);
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "hono-dodiflux",
+  "scripts": {
+    "build:css": "sass --no-source-map static/style.scss static/style.css",
+    "build": "bun run build:css",
+    "dev:css": "sass --watch --no-source-map static/style.scss static/style.css",
+    "dev:js": "bun run --watch src/index.tsx",
+    "dev": "conc \"bun run dev:css\" \"bun run dev:js\"",
+    "lint": "biome check --write --unsafe"
+  },
+  "dependencies": {
+    "date-fns": "^4.1.0",
+    "hono": "^4.10.4",
+    "htmx.org": "^2.0.8",
+    "jsdom": "^27.1.0",
+    "trynot": "^0.0.3",
+    "up-fetch": "^2.5.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.3.2",
+    "@picocss/pico": "^2.1.1",
+    "@types/bun": "latest",
+    "@types/jsdom": "^27.0.0",
+    "concurrently": "^9.2.1",
+    "knip": "^5.67.1",
+    "sass": "^1.93.3"
+  }
+}

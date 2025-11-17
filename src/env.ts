@@ -9,5 +9,7 @@ export const $env = z
     WALLABAG_PASSWORD: z.string(),
     MINIFLUX_API_URL: z.string(),
     MINIFLUX_API_KEY: z.string(),
+    GOOGLE_CLIENT_ID: z.string(),
+    GOOGLE_CLIENT_SECRET: z.string(),
   })
   .parse(Bun.env);

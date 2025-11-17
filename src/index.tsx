@@ -17,8 +17,28 @@ declare module "hono" {
 export const app = new Hono();
 
 const globalContext = createGlobalContext();
+
 app.use("*", async (c, next) => {
   c.set("ctx", globalContext);
+  await next();
+});
+
+app.get("/google/oauth/redirect", async (c) => {
+  const code = c.req.query("code");
+  if (!code) {
+    return c.text("Invalid code", 400);
+  }
+  const ctx = c.get("ctx");
+  await ctx.youtube.authenticate({ code });
+  return c.redirect("/");
+});
+
+app.use("*", async (c, next) => {
+  const ctx = c.get("ctx");
+  const isAuthenticated = await ctx.youtube.isAuthenticated();
+  if (!isAuthenticated) {
+    return c.redirect(ctx.youtube.generateAuthUrl());
+  }
   await next();
 });
 

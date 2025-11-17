@@ -5,7 +5,7 @@ export function createYoutubeClient() {
   const auth = new google.auth.OAuth2(
     $env.GOOGLE_CLIENT_ID,
     $env.GOOGLE_CLIENT_SECRET,
-    "http://localhost:3001/google/oauth/redirect",
+    $env.GOOGLE_OAUTH_REDIRECT,
   );
 
   const client = google.youtube({

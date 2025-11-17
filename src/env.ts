@@ -11,5 +11,6 @@ export const $env = z
     MINIFLUX_API_KEY: z.string(),
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
+    GOOGLE_OAUTH_REDIRECT: z.string(),
   })
   .parse(Bun.env);

@@ -46,8 +46,12 @@ export function createYoutubeClient() {
       });
     },
     authenticate: async (input: { code: string }) => {
-      const { tokens } = await auth.getToken(input.code);
-      auth.setCredentials(tokens);
+      try {
+        const { tokens } = await auth.getToken(input.code);
+        auth.setCredentials(tokens);
+      } catch (error) {
+        console.log("error", error);
+      }
     },
   };
 }

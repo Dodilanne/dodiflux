@@ -35,7 +35,9 @@ export function createYoutubeClient() {
     client,
     isAuthenticated: async () => {
       await initialization;
-      return !!auth.credentials.refresh_token;
+      return (
+        !!auth.credentials.refresh_token || !!auth.credentials.access_token
+      );
     },
     generateAuthUrl: () => {
       return auth.generateAuthUrl({

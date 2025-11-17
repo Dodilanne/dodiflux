@@ -7,6 +7,7 @@ import { createGlobalContext, type GlobalContext } from "./global-context";
 import { categoriesRoute } from "./routes/categories";
 import { homeRoute } from "./routes/home";
 import { minifluxRoute } from "./routes/miniflux";
+import { youtubeRoute } from "./routes/youtube";
 
 declare module "hono" {
   interface ContextVariableMap {
@@ -73,6 +74,7 @@ app.get(
 app.route("/", homeRoute);
 app.route("/categories", categoriesRoute);
 app.route("/miniflux", minifluxRoute);
+app.route("/youtube", youtubeRoute);
 
 export default {
   port: 3001,

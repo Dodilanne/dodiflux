@@ -8,8 +8,8 @@
     "layout/overflow-auto": false,
     "content/link": true,
     "content/typography": true,
-    "content/embedded": false,
-    "content/button": false,
+    "content/embedded": true,
+    "content/button": true,
     "content/table": false,
     "content/code": true,
     "content/figure": false,
@@ -35,6 +35,14 @@
 
 @use "../node_modules/@picocss/pico/scss/colors/utilities" with ($palette: ("color-families": (green, amber, red)),
   $utilities: ("background-colors": false));
+
+:root {
+
+  button {
+    font-size: smaller;
+    padding: 0 calc(var(--pico-spacing) * 0.4);
+  }
+}
 
 .alert-container {
   position: fixed;

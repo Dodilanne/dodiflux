@@ -104,7 +104,10 @@ const CategoryEntries = async ({
               </p>
               <button
                 type="button"
-                class={css`margin-left: auto;`}
+                class={cx(
+                  "secondary",
+                  css`margin-left: auto; margin-bottom: 0;`,
+                )}
                 hx-post={`/miniflux/entries/${entry.id}/read`}
                 hx-target="closest article"
                 hx-swap="delete"
@@ -193,7 +196,7 @@ const Entry = memo(async (props: { content: Promise<Result<string>> }) => {
             width: 100%;
             height: 100%;
             aspect-ratio: 16 / 9;
-            max-width: 350px;
+            max-width: 700px;
             margin-bottom: 1rem;
           }
           table {
@@ -277,5 +280,22 @@ function sanitizeContent(rawContent: string) {
       anchor.after(span);
     }
   }
+
+  for (const iframe of Array.from(doc.querySelectorAll("iframe"))) {
+    if (iframe.src.includes("youtube-nocookie.com/embed")) {
+      const videoId = iframe.src.split("embed/")[1];
+      if (!videoId) {
+        continue;
+      }
+      const button = doc.createElement("button");
+      button.textContent = "like";
+      button.classList.add("secondary");
+      button.style.display = "block";
+      button.setAttribute("hx-post", `/youtube/like/${videoId}`);
+      button.setAttribute("hx-swap", "outerHTML");
+      iframe.after(button);
+    }
+  }
+
   return doc.documentElement.outerHTML;
 }

@@ -14,7 +14,6 @@ export function createYoutubeClient() {
   });
 
   auth.on("tokens", async (tokens) => {
-    console.log("new tokens", tokens);
     if (tokens.refresh_token) {
       await Bun.write("refresh.txt", tokens.refresh_token);
     }

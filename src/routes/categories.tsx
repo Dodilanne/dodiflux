@@ -6,6 +6,7 @@ import { JSDOM } from "jsdom";
 import { isErr, type Result, wrap } from "trynot";
 import z from "zod";
 import { Layout } from "../components/layout";
+import type { GlobalContext } from "../global-context";
 import type { minifluxSchemas } from "../global-context/miniflux";
 
 export const categoriesRoute = new Hono();
@@ -133,7 +134,7 @@ categoriesRoute.get(
         .request(`/entries/${entry.id}`, {
           schema: c.var.ctx.miniflux.schemas.entry,
         })
-        .then((entry) => sanitizeContent(entry.content)),
+        .then((entry) => sanitizeContent(entry.content, c.var.ctx)),
     );
 
     return c.render(
@@ -240,7 +241,7 @@ const Entry = memo(async (props: { content: Promise<Result<string>> }) => {
   );
 });
 
-function sanitizeContent(rawContent: string) {
+async function sanitizeContent(rawContent: string, ctx: GlobalContext) {
   const content = rawContent
     .replace(/\u034F/g, "") // Remove combining grapheme joiner
     .replace(/[\u200B-\u200D\uFEFF]/g, "") // Remove zero-width characters
@@ -281,18 +282,40 @@ function sanitizeContent(rawContent: string) {
     }
   }
 
-  for (const iframe of Array.from(doc.querySelectorAll("iframe"))) {
-    if (iframe.src.includes("youtube-nocookie.com/embed")) {
+  const youtubeVideos = Array.from(doc.querySelectorAll("iframe")).flatMap(
+    (iframe) => {
+      if (!iframe.src.includes("youtube-nocookie.com/embed")) {
+        return [];
+      }
       const videoId = iframe.src.split("embed/")[1];
       if (!videoId) {
-        continue;
+        return [];
       }
+      return { iframe, videoId };
+    },
+  );
+
+  if (youtubeVideos.length > 0) {
+    const ratings = await ctx.youtube.client.videos
+      .getRating({
+        id: youtubeVideos.map((video) => video.videoId),
+      })
+      .catch(() => undefined);
+    for (const { iframe, videoId } of youtubeVideos) {
+      const rating = ratings?.data.items?.find(
+        (i) => i.videoId === videoId,
+      )?.rating;
+      const isLiked = rating === "like";
       const button = doc.createElement("button");
-      button.textContent = "like";
-      button.classList.add("secondary");
       button.style.display = "block";
-      button.setAttribute("hx-post", `/youtube/like/${videoId}`);
-      button.setAttribute("hx-swap", "outerHTML");
+      if (isLiked) {
+        button.textContent = "liked";
+      } else {
+        button.textContent = "like";
+        button.classList.add("secondary");
+        button.setAttribute("hx-post", `/youtube/like/${videoId}`);
+        button.setAttribute("hx-swap", "outerHTML");
+      }
       iframe.after(button);
     }
   }

@@ -21,7 +21,6 @@ youtubeRoute.post("like/:videoId", async (c) => {
     }),
   );
   if (isErr(res)) {
-    console.log("res", res);
     return c.text(res.message, 500);
   }
   return c.html(

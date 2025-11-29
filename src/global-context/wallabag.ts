@@ -1,12 +1,37 @@
 import { up } from "up-fetch";
 import z from "zod";
 import { $env } from "../env";
+import type { GenericEntry } from "../types";
+
+export const wallabagEntrySchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  domain_name: z.string(),
+  content: z.string(),
+});
 
 export const wallabagSchemas = {
   entries: z.object({
     total: z.number(),
+    _embedded: z.object({
+      items: z.array(wallabagEntrySchema),
+    }),
   }),
+  entry: wallabagEntrySchema,
 };
+
+export function wallabagToGenericEntry(
+  entry: z.infer<typeof wallabagEntrySchema>,
+): GenericEntry {
+  return {
+    id: entry.id,
+    title: entry.title,
+    category: "saved",
+    feed: entry.domain_name,
+    content: entry.content,
+    publishedAt: undefined,
+  };
+}
 
 export function createWallabagClient() {
   const auth = createWallabagAuthClient();

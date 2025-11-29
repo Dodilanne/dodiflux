@@ -7,7 +7,9 @@ import { isErr, type Result, wrap } from "trynot";
 import z from "zod";
 import { Layout } from "../components/layout";
 import type { GlobalContext } from "../global-context";
-import type { minifluxSchemas } from "../global-context/miniflux";
+import { minifluxToGenericEntry } from "../global-context/miniflux";
+import { wallabagToGenericEntry } from "../global-context/wallabag";
+import type { GenericEntry } from "../types";
 
 export const categoriesRoute = new Hono();
 
@@ -22,14 +24,63 @@ const idAndTitleSchema = z
     })),
   );
 
+categoriesRoute.get(`/saved/entries`, async (c) => {
+  const categoryEntries = wrap(
+    c.var.ctx.wallabag
+      .request("entries", {
+        params: { archive: 0 },
+        schema: c.var.ctx.wallabag.schemas.entries,
+      })
+      .then(({ total, _embedded: { items: entries } }) => ({
+        total,
+        entries: entries.map(wallabagToGenericEntry),
+      })),
+  );
+
+  return c.render(
+    <Layout
+      header={{
+        nav: [{ name: "saved" }],
+      }}
+      footer={{
+        promises: [categoryEntries],
+      }}
+    >
+      <Suspense
+        fallback={
+          <Fragment>
+            {Array.from({ length: 4 }, () => (
+              <article class={css`color: transparent;`}>
+                <hgroup style={{ marginBottom: 0 }}>
+                  entry
+                  <p>
+                    <small class={css`color: transparent;`}>feed</small>
+                  </p>
+                </hgroup>
+              </article>
+            ))}
+          </Fragment>
+        }
+      >
+        <CategoryEntries categoryEntries={categoryEntries} />
+      </Suspense>
+    </Layout>,
+  );
+});
+
 categoriesRoute.get(`/:category{${idAndTitleRegex}}/entries`, async (c) => {
   const category = idAndTitleSchema.parse(c.req.param("category"));
 
   const categoryEntries = wrap(
-    c.var.ctx.miniflux.request(`/categories/${category.id}/entries`, {
-      params: { status: "unread", direction: "desc" },
-      schema: c.var.ctx.miniflux.schemas.entries,
-    }),
+    c.var.ctx.miniflux
+      .request(`/categories/${category.id}/entries`, {
+        params: { status: "unread", direction: "desc" },
+        schema: c.var.ctx.miniflux.schemas.entries,
+      })
+      .then(({ total, entries }) => ({
+        total,
+        entries: entries.map(minifluxToGenericEntry),
+      })),
   );
 
   return c.render(
@@ -66,7 +117,7 @@ categoriesRoute.get(`/:category{${idAndTitleRegex}}/entries`, async (c) => {
 const CategoryEntries = async ({
   categoryEntries,
 }: {
-  categoryEntries: Promise<Result<z.infer<typeof minifluxSchemas.entries>>>;
+  categoryEntries: Promise<Result<{ entries: GenericEntry[] }>>;
 }) => {
   const result = await categoryEntries;
 
@@ -87,7 +138,7 @@ const CategoryEntries = async ({
           <hgroup style={{ marginBottom: 0 }}>
             <a
               class={cx("contrast", css`text-decoration: none;`)}
-              href={`/categories/${entry.feed.category.id}-${entry.feed.category.title}/entries/${entry.id}-${encodeURIComponent(entry.title)}`}
+              href={`/categories/${entry.category}/entries/${entry.id}-${encodeURIComponent(entry.title)}`}
             >
               {entry.title}
             </a>
@@ -96,11 +147,13 @@ const CategoryEntries = async ({
             >
               <p class={css`margin: 0;`}>
                 <small>
-                  {entry.feed.title} •{" "}
-                  {formatRelative(entry.published_at, new Date())
-                    .toLowerCase()
-                    .replace(/^last /, "")
-                    .replace(/ at.*/, "")}
+                  {entry.feed}
+                  {entry.publishedAt && " • "}
+                  {entry.publishedAt &&
+                    formatRelative(entry.publishedAt, new Date())
+                      .toLowerCase()
+                      .replace(/^last /, "")
+                      .replace(/ at.*/, "")}
                 </small>
               </p>
               <button
@@ -122,6 +175,49 @@ const CategoryEntries = async ({
     </Fragment>
   );
 };
+
+categoriesRoute.get(`/saved/entries/:entry{${idAndTitleRegex}}`, async (c) => {
+  const entry = idAndTitleSchema.parse(c.req.param("entry"));
+
+  const content = wrap(
+    c.var.ctx.wallabag
+      .request(`/entries/${entry.id}`, {
+        schema: c.var.ctx.wallabag.schemas.entry,
+      })
+      .then((entry) => entry.content),
+  );
+
+  return c.render(
+    <Layout
+      header={{
+        nav: [
+          {
+            name: "saved",
+            href: `/categories/saved/entries`,
+          },
+          {
+            name: entry.title,
+            class: css`
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            `,
+          },
+        ],
+      }}
+      footer={{
+        promises: [content],
+      }}
+    >
+      <hgroup>
+        <h1>{entry.title}</h1>
+      </hgroup>
+      <Suspense fallback="">
+        <Entry content={content} />
+      </Suspense>
+    </Layout>,
+  );
+});
 
 categoriesRoute.get(
   `/:category{${idAndTitleRegex}}/entries/:entry{${idAndTitleRegex}}`,

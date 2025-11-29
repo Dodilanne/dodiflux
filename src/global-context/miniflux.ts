@@ -1,6 +1,22 @@
 import { up } from "up-fetch";
 import z from "zod";
 import { $env } from "../env";
+import type { GenericEntry } from "../types";
+
+const minifluxEntrySchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  published_at: z.string(),
+  content: z.string(),
+  feed: z.object({
+    title: z.string(),
+    category: z.object({
+      id: z.number(),
+      user_id: z.number(),
+      title: z.string(),
+    }),
+  }),
+});
 
 export const minifluxSchemas = {
   category: z.object({
@@ -13,108 +29,9 @@ export const minifluxSchemas = {
   }),
   entries: z.object({
     total: z.number(),
-    entries: z.array(
-      z.object({
-        id: z.number(),
-        user_id: z.number(),
-        feed_id: z.number(),
-        title: z.string(),
-        url: z.string(),
-        comments_url: z.string(),
-        author: z.string(),
-        content: z.string(),
-        hash: z.string(),
-        published_at: z.string(),
-        created_at: z.string(),
-        status: z.string(),
-        share_code: z.string(),
-        starred: z.boolean(),
-        reading_time: z.number(),
-        feed: z.object({
-          id: z.number(),
-          user_id: z.number(),
-          title: z.string(),
-          site_url: z.string(),
-          feed_url: z.string(),
-          checked_at: z.string(),
-          etag_header: z.string(),
-          last_modified_header: z.string(),
-          parsing_error_message: z.string(),
-          parsing_error_count: z.number(),
-          scraper_rules: z.string(),
-          rewrite_rules: z.string(),
-          crawler: z.boolean(),
-          blocklist_rules: z.string(),
-          keeplist_rules: z.string(),
-          user_agent: z.string(),
-          username: z.string(),
-          password: z.string(),
-          disabled: z.boolean(),
-          ignore_http_cache: z.boolean(),
-          fetch_via_proxy: z.boolean(),
-          category: z.object({
-            id: z.number(),
-            user_id: z.number(),
-            title: z.string(),
-          }),
-          icon: z.object({
-            feed_id: z.number(),
-            icon_id: z.number(),
-          }),
-        }),
-      }),
-    ),
+    entries: z.array(minifluxEntrySchema),
   }),
-  entry: z.object({
-    id: z.number(),
-    user_id: z.number(),
-    feed_id: z.number(),
-    title: z.string(),
-    url: z.string(),
-    comments_url: z.string(),
-    author: z.string(),
-    content: z.string(),
-    hash: z.string(),
-    published_at: z.string(),
-    created_at: z.string(),
-    status: z.string(),
-    share_code: z.string(),
-    starred: z.boolean(),
-    reading_time: z.number(),
-    enclosures: z.any(),
-    feed: z.object({
-      id: z.number(),
-      user_id: z.number(),
-      title: z.string(),
-      site_url: z.string(),
-      feed_url: z.string(),
-      checked_at: z.string(),
-      etag_header: z.string(),
-      last_modified_header: z.string(),
-      parsing_error_message: z.string(),
-      parsing_error_count: z.number(),
-      scraper_rules: z.string(),
-      rewrite_rules: z.string(),
-      crawler: z.boolean(),
-      blocklist_rules: z.string(),
-      keeplist_rules: z.string(),
-      user_agent: z.string(),
-      username: z.string(),
-      password: z.string(),
-      disabled: z.boolean(),
-      ignore_http_cache: z.boolean(),
-      fetch_via_proxy: z.boolean(),
-      category: z.object({
-        id: z.number(),
-        user_id: z.number(),
-        title: z.string(),
-      }),
-      icon: z.object({
-        feed_id: z.number(),
-        icon_id: z.number(),
-      }),
-    }),
-  }),
+  entry: minifluxEntrySchema,
 };
 
 export function createMinifluxClient() {
@@ -127,5 +44,18 @@ export function createMinifluxClient() {
       },
     })),
     schemas: minifluxSchemas,
+  };
+}
+
+export function minifluxToGenericEntry(
+  entry: z.infer<typeof minifluxEntrySchema>,
+): GenericEntry {
+  return {
+    id: entry.id,
+    title: entry.title,
+    category: `${entry.feed.category.id}-${entry.feed.category.title}`,
+    feed: entry.feed.title,
+    publishedAt: entry.published_at,
+    content: entry.content,
   };
 }

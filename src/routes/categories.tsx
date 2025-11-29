@@ -69,6 +69,15 @@ categoriesRoute.get(`/saved/entries`, async (c) => {
             <button
               type="button"
               class={cx("secondary", css` margin-bottom: 0;`)}
+              hx-delete={`/wallabag/entries/${entry.id}`}
+              hx-target="closest article"
+              hx-swap="delete"
+            >
+              delete
+            </button>,
+            <button
+              type="button"
+              class={cx("secondary", css` margin-bottom: 0;`)}
               hx-post={`/wallabag/entries/${entry.id}/read`}
               hx-target="closest article"
               hx-swap="delete"

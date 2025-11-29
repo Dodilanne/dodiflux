@@ -3,7 +3,7 @@ import { Hono } from "hono";
 import { css, cx } from "hono/css";
 import { Fragment, memo, Suspense } from "hono/jsx";
 import { JSDOM } from "jsdom";
-import { isErr, type Result, wrap } from "trynot";
+import { isErr, parseError, type Result, wrap } from "trynot";
 import z from "zod";
 import { Layout } from "../components/layout";
 import type { GlobalContext } from "../global-context";
@@ -177,14 +177,12 @@ const CategoryEntries = async ({
 };
 
 categoriesRoute.get(`/saved/entries/:entry{${idAndTitleRegex}}`, async (c) => {
-  const entry = idAndTitleSchema.parse(c.req.param("entry"));
+  const query = idAndTitleSchema.parse(c.req.param("entry"));
 
-  const content = wrap(
-    c.var.ctx.wallabag
-      .request(`/entries/${entry.id}`, {
-        schema: c.var.ctx.wallabag.schemas.entry,
-      })
-      .then((entry) => entry.content),
+  const entry = wrap(
+    c.var.ctx.wallabag.request(`/entries/${query.id}`, {
+      schema: c.var.ctx.wallabag.schemas.entry,
+    }),
   );
 
   return c.render(
@@ -196,7 +194,7 @@ categoriesRoute.get(`/saved/entries/:entry{${idAndTitleRegex}}`, async (c) => {
             href: `/categories/saved/entries`,
           },
           {
-            name: entry.title,
+            name: query.title,
             class: css`
               white-space: nowrap;
               overflow: hidden;
@@ -206,14 +204,14 @@ categoriesRoute.get(`/saved/entries/:entry{${idAndTitleRegex}}`, async (c) => {
         ],
       }}
       footer={{
-        promises: [content],
+        promises: [entry],
       }}
     >
       <hgroup>
-        <h1>{entry.title}</h1>
+        <h1>{query.title}</h1>
       </hgroup>
       <Suspense fallback="">
-        <Entry content={content} />
+        <Entry entry={entry} />
       </Suspense>
     </Layout>,
   );
@@ -223,14 +221,20 @@ categoriesRoute.get(
   `/:category{${idAndTitleRegex}}/entries/:entry{${idAndTitleRegex}}`,
   async (c) => {
     const category = idAndTitleSchema.parse(c.req.param("category"));
-    const entry = idAndTitleSchema.parse(c.req.param("entry"));
+    const query = idAndTitleSchema.parse(c.req.param("entry"));
 
-    const content = wrap(
+    const entry = wrap(
       c.var.ctx.miniflux
-        .request(`/entries/${entry.id}`, {
+        .request(`/entries/${query.id}`, {
           schema: c.var.ctx.miniflux.schemas.entry,
         })
-        .then((entry) => sanitizeContent(entry.content, c.var.ctx)),
+        .then(async (entry) => ({
+          content: await sanitizeContent(entry.content, c.var.ctx).catch(
+            (error) => {
+              return `Failed to sanitize content: ${parseError(error).message}`;
+            },
+          ),
+        })),
     );
 
     return c.render(
@@ -242,7 +246,7 @@ categoriesRoute.get(
               href: `/categories/${category.id}-${category.title}/entries`,
             },
             {
-              name: entry.title,
+              name: query.title,
               class: css`
               white-space: nowrap;
               overflow: hidden;
@@ -252,30 +256,41 @@ categoriesRoute.get(
           ],
         }}
         footer={{
-          promises: [content],
+          promises: [entry],
         }}
       >
         <hgroup>
-          <h1>{entry.title}</h1>
+          <h1>{query.title}</h1>
         </hgroup>
         <Suspense fallback="">
-          <Entry content={content} />
+          <Entry entry={entry} />
         </Suspense>
       </Layout>,
     );
   },
 );
 
-const Entry = memo(async (props: { content: Promise<Result<string>> }) => {
-  const content = await props.content;
+const Entry = memo(
+  async (props: {
+    entry: Promise<
+      Result<{ content: string; url?: string | undefined | null }>
+    >;
+  }) => {
+    const entry = await props.entry;
 
-  if (isErr(content)) {
-    return <Fragment />;
-  }
+    if (isErr(entry)) {
+      return <Fragment />;
+    }
 
-  return (
-    <section
-      class={css`
+    return (
+      <Fragment>
+        {entry.url && (
+          <a href={entry.url} target="_blank" rel="noopener noreferrer">
+            original
+          </a>
+        )}
+        <section
+          class={css`
           td {
             padding: 0;
           }
@@ -332,10 +347,12 @@ const Entry = memo(async (props: { content: Promise<Result<string>> }) => {
             }
           }
         `}
-      dangerouslySetInnerHTML={{ __html: content }}
-    />
-  );
-});
+          dangerouslySetInnerHTML={{ __html: entry.content }}
+        />
+      </Fragment>
+    );
+  },
+);
 
 async function sanitizeContent(rawContent: string, ctx: GlobalContext) {
   const content = rawContent

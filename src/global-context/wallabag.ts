@@ -8,6 +8,7 @@ export const wallabagEntrySchema = z.object({
   title: z.string(),
   domain_name: z.string(),
   content: z.string(),
+  url: z.string().nullish(),
 });
 
 export const wallabagSchemas = {

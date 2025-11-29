@@ -4,3 +4,4 @@ static/style.css
 .env
 .env.*
 refresh.txt
+ignore/

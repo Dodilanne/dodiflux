@@ -63,7 +63,20 @@ categoriesRoute.get(`/saved/entries`, async (c) => {
           </Fragment>
         }
       >
-        <CategoryEntries categoryEntries={categoryEntries} />
+        <CategoryEntries
+          categoryEntries={categoryEntries}
+          actions={(entry) => [
+            <button
+              type="button"
+              class={cx("secondary", css` margin-bottom: 0;`)}
+              hx-post={`/wallabag/entries/${entry.id}/read`}
+              hx-target="closest article"
+              hx-swap="delete"
+            >
+              read
+            </button>,
+          ]}
+        />
       </Suspense>
     </Layout>,
   );

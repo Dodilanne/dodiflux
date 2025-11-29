@@ -74,6 +74,7 @@ app.get(
 app.route("/", homeRoute);
 app.route("/categories", categoriesRoute);
 app.route("/miniflux", minifluxRoute);
+app.route("/wallabag", wallabagRoute);
 app.route("/youtube", youtubeRoute);
 
 export default {

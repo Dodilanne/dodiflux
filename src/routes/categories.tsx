@@ -434,10 +434,27 @@ async function sanitizeContent(rawContent: string, ctx: GlobalContext) {
       firstChild?.nodeName !== "IMG" &&
       (firstChild?.nodeName !== "#text" || firstChild.nodeValue?.trim().length)
     ) {
-      const span = doc.createElement("span");
-      span.classList.add("save-btn");
-      span.textContent = "✦";
-      anchor.after(span);
+      try {
+        let url = anchor.href;
+        if (url.startsWith("https://click.kit-mail6.com")) {
+          const base64 = url.split("/").pop();
+          if (base64) {
+            url = atob(base64);
+          }
+        } else if (url.startsWith("https://tracking.tldrnewsletter.com")) {
+          const match = url.match(/CL0\/([^/]+)/);
+          if (match?.[1]) {
+            url = decodeURIComponent(match[1]);
+          }
+        }
+        const span = doc.createElement("span");
+        span.classList.add("save-btn");
+        span.textContent = "✦";
+        span.setAttribute("hx-swap", "outerHTML");
+        span.setAttribute("hx-post", "/wallabag/entries");
+        span.setAttribute("hx-vals", JSON.stringify({ url }));
+        anchor.after(span);
+      } catch {}
     }
   }
 

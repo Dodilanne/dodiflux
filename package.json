@@ -9,6 +9,7 @@
     "lint": "biome check --write --unsafe"
   },
   "dependencies": {
+    "@hono/zod-validator": "^0.7.5",
     "date-fns": "^4.1.0",
     "googleapis": "^166.0.0",
     "hono": "^4.10.4",

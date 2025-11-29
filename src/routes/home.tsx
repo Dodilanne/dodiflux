@@ -24,13 +24,6 @@ homeRoute.get("/", (c) => {
     }),
   );
 
-  c.var.ctx.wallabag
-    .request("entries", {
-      params: { archive: 0 },
-    })
-    .then((res) => Bun.write("saved.json", JSON.stringify(res)))
-    .catch(console.error);
-
   return c.render(
     <Layout footer={{ promises: [categories, saved] }}>
       <Suspense

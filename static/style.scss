@@ -24,7 +24,7 @@
     "components/accordion": false,
     "components/card": true,
     "components/dropdown": false,
-    "components/group": false,
+    "components/group": true,
     "components/loading": false,
     "components/modal": false,
     "components/nav": true,
@@ -37,10 +37,14 @@
   $utilities: ("background-colors": false));
 
 :root {
-
   button {
     font-size: smaller;
     padding: 0 calc(var(--pico-spacing) * 0.4);
+  }
+
+  [role=group] {
+    width: unset;
+    margin-bottom: 0;
   }
 }
 

@@ -2,6 +2,7 @@ import { formatRelative } from "date-fns/formatRelative";
 import { Hono } from "hono";
 import { css, cx } from "hono/css";
 import { Fragment, memo, Suspense } from "hono/jsx";
+import type { JSX } from "hono/jsx/jsx-runtime";
 import { JSDOM } from "jsdom";
 import { isErr, parseError, type Result, wrap } from "trynot";
 import z from "zod";
@@ -108,7 +109,20 @@ categoriesRoute.get(`/:category{${idAndTitleRegex}}/entries`, async (c) => {
           </Fragment>
         }
       >
-        <CategoryEntries categoryEntries={categoryEntries} />
+        <CategoryEntries
+          categoryEntries={categoryEntries}
+          actions={(entry) => [
+            <button
+              type="button"
+              class={cx("secondary", css` margin-bottom: 0;`)}
+              hx-post={`/miniflux/entries/${entry.id}/read`}
+              hx-target="closest article"
+              hx-swap="delete"
+            >
+              read
+            </button>,
+          ]}
+        />
       </Suspense>
     </Layout>,
   );
@@ -116,8 +130,10 @@ categoriesRoute.get(`/:category{${idAndTitleRegex}}/entries`, async (c) => {
 
 const CategoryEntries = async ({
   categoryEntries,
+  actions: createActions,
 }: {
   categoryEntries: Promise<Result<{ entries: GenericEntry[] }>>;
+  actions?: (entry: GenericEntry) => JSX.Element[];
 }) => {
   const result = await categoryEntries;
 
@@ -133,45 +149,42 @@ const CategoryEntries = async ({
 
   return (
     <Fragment>
-      {result.entries.map((entry) => (
-        <article>
-          <hgroup style={{ marginBottom: 0 }}>
-            <a
-              class={cx("contrast", css`text-decoration: none;`)}
-              href={`/categories/${entry.category}/entries/${entry.id}-${encodeURIComponent(entry.title)}`}
-            >
-              {entry.title}
-            </a>
-            <div
-              class={css`display: flex; align-items: flex-end; justify-content: space-between; gap: calc(var(--pico-spacing) * 0.5); flex-wrap: wrap;`}
-            >
-              <p class={css`margin: 0;`}>
-                <small>
-                  {entry.feed}
-                  {entry.publishedAt && " • "}
-                  {entry.publishedAt &&
-                    formatRelative(entry.publishedAt, new Date())
-                      .toLowerCase()
-                      .replace(/^last /, "")
-                      .replace(/ at.*/, "")}
-                </small>
-              </p>
-              <button
-                type="button"
-                class={cx(
-                  "secondary",
-                  css`margin-left: auto; margin-bottom: 0;`,
-                )}
-                hx-post={`/miniflux/entries/${entry.id}/read`}
-                hx-target="closest article"
-                hx-swap="delete"
+      {result.entries.map((entry) => {
+        const actions = createActions?.(entry) ?? [];
+        return (
+          <article>
+            <hgroup style={{ marginBottom: 0 }}>
+              <a
+                class={cx("contrast", css`text-decoration: none;`)}
+                href={`/categories/${entry.category}/entries/${entry.id}-${encodeURIComponent(entry.title)}`}
               >
-                read
-              </button>
-            </div>
-          </hgroup>
-        </article>
-      ))}
+                {entry.title}
+              </a>
+              <div
+                class={css`display: flex; align-items: flex-end; justify-content: space-between; gap: calc(var(--pico-spacing) * 0.5); flex-wrap: wrap;`}
+              >
+                <p class={css`margin: 0;`}>
+                  <small>
+                    {entry.feed}
+                    {entry.publishedAt && " • "}
+                    {entry.publishedAt &&
+                      formatRelative(entry.publishedAt, new Date())
+                        .toLowerCase()
+                        .replace(/^last /, "")
+                        .replace(/ at.*/, "")}
+                  </small>
+                </p>
+                {actions.length > 0 && (
+                  // biome-ignore lint/a11y/useSemanticElements: it's the pico way
+                  <div role="group" class={css`margin-left: auto;`}>
+                    {actions}
+                  </div>
+                )}
+              </div>
+            </hgroup>
+          </article>
+        );
+      })}
     </Fragment>
   );
 };

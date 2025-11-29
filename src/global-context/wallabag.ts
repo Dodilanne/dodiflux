@@ -8,6 +8,7 @@ export const wallabagEntrySchema = z.object({
   title: z.string(),
   domain_name: z.string(),
   content: z.string(),
+  is_starred: z.coerce.boolean(),
   url: z.string().nullish(),
 });
 
@@ -31,6 +32,7 @@ export function wallabagToGenericEntry(
     feed: entry.domain_name,
     content: entry.content,
     publishedAt: undefined,
+    isStarred: entry.is_starred,
   };
 }
 

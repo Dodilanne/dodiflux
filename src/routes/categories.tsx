@@ -68,7 +68,7 @@ categoriesRoute.get(`/saved/entries`, async (c) => {
           actions={(entry) => [
             <button
               type="button"
-              class={cx("secondary", css` margin-bottom: 0;`)}
+              class={cx("secondary", css`margin-bottom: 0;`)}
               hx-delete={`/wallabag/entries/${entry.id}`}
               hx-target="closest article"
               hx-swap="delete"
@@ -77,7 +77,18 @@ categoriesRoute.get(`/saved/entries`, async (c) => {
             </button>,
             <button
               type="button"
-              class={cx("secondary", css` margin-bottom: 0;`)}
+              class={cx(
+                entry.isStarred ? "primary" : "secondary",
+                css`margin-bottom: 0;`,
+              )}
+              hx-post={`/wallabag/entries/${entry.id}/${entry.isStarred ? "unstar" : "star"}`}
+              hx-swap="outerHTML"
+            >
+              star
+            </button>,
+            <button
+              type="button"
+              class={cx("secondary", css`margin-bottom: 0;`)}
               hx-post={`/wallabag/entries/${entry.id}/read`}
               hx-target="closest article"
               hx-swap="delete"

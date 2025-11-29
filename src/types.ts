@@ -5,4 +5,5 @@ export type GenericEntry = {
   feed: string;
   publishedAt: string | undefined;
   content: string;
+  isStarred: boolean;
 };

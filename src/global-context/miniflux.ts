@@ -57,5 +57,6 @@ export function minifluxToGenericEntry(
     feed: entry.feed.title,
     publishedAt: entry.published_at,
     content: entry.content,
+    isStarred: false,
   };
 }

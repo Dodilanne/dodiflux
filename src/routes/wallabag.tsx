@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { css, cx } from "hono/css";
 import { isErr, wrap } from "trynot";
 
 export const wallabagRoute = new Hono();
@@ -30,6 +31,82 @@ wallabagRoute.post("/entries/:entryId/read", async (c) => {
   }
 
   return c.html(<div>ok</div>);
+});
+
+wallabagRoute.post("/entries/:entryId/star", async (c) => {
+  const entryId = Number(c.req.param("entryId"));
+
+  const result = await wrap(
+    c.var.ctx.wallabag.request(`entries/${entryId}`, {
+      method: "PATCH",
+      body: {
+        starred: 1,
+      },
+    }),
+  );
+
+  if (isErr(result)) {
+    return c.html(
+      <li class="error">
+        <p>{result.message}</p>
+        <button
+          type="button"
+          arial-label="Close"
+          onclick="this.closest('li').remove()"
+        />
+      </li>,
+      500,
+    );
+  }
+
+  return c.html(
+    <button
+      type="button"
+      class={cx("primary", css`margin-bottom: 0;`)}
+      hx-post={`/wallabag/entries/${entryId}/unstar`}
+      hx-swap="outerHTML"
+    >
+      star
+    </button>,
+  );
+});
+
+wallabagRoute.post("/entries/:entryId/unstar", async (c) => {
+  const entryId = Number(c.req.param("entryId"));
+
+  const result = await wrap(
+    c.var.ctx.wallabag.request(`entries/${entryId}`, {
+      method: "PATCH",
+      body: {
+        starred: 0,
+      },
+    }),
+  );
+
+  if (isErr(result)) {
+    return c.html(
+      <li class="error">
+        <p>{result.message}</p>
+        <button
+          type="button"
+          arial-label="Close"
+          onclick="this.closest('li').remove()"
+        />
+      </li>,
+      500,
+    );
+  }
+
+  return c.html(
+    <button
+      type="button"
+      class={cx("secondary", css`margin-bottom: 0;`)}
+      hx-post={`/wallabag/entries/${entryId}/star`}
+      hx-swap="outerHTML"
+    >
+      star
+    </button>,
+  );
 });
 
 wallabagRoute.delete("/entries/:entryId", async (c) => {

@@ -455,12 +455,22 @@ async function sanitizeContent(rawContent: string, ctx: GlobalContext) {
   );
 
   if (youtubeVideos.length > 0) {
-    const ratings = await ctx.youtube.client.videos
-      .getRating({
-        id: youtubeVideos.map((video) => video.videoId),
-      })
-      .catch(() => undefined);
+    const isAuthenticated = await ctx.youtube.isAuthenticated();
+    const ratings = isAuthenticated
+      ? await ctx.youtube.client.videos
+          .getRating({ id: youtubeVideos.map((video) => video.videoId) })
+          .catch(() => undefined)
+      : undefined;
     for (const { iframe, videoId } of youtubeVideos) {
+      if (!isAuthenticated) {
+        const anchor = doc.createElement("a");
+        anchor.textContent = "login to like";
+        anchor.classList.add("contrast");
+        anchor.setAttribute("href", ctx.youtube.generateAuthUrl());
+        anchor.setAttribute("role", "button");
+        iframe.after(anchor);
+        continue;
+      }
       const rating = ratings?.data.items?.find(
         (i) => i.videoId === videoId,
       )?.rating;

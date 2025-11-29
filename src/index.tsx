@@ -7,6 +7,7 @@ import { createGlobalContext, type GlobalContext } from "./global-context";
 import { categoriesRoute } from "./routes/categories";
 import { homeRoute } from "./routes/home";
 import { minifluxRoute } from "./routes/miniflux";
+import { wallabagRoute } from "./routes/wallabag";
 import { youtubeRoute } from "./routes/youtube";
 
 declare module "hono" {
@@ -32,15 +33,6 @@ app.get("/google/oauth/redirect", async (c) => {
   const ctx = c.get("ctx");
   await ctx.youtube.authenticate({ code });
   return c.redirect("/");
-});
-
-app.use("*", async (c, next) => {
-  const ctx = c.get("ctx");
-  const isAuthenticated = await ctx.youtube.isAuthenticated();
-  if (!isAuthenticated) {
-    return c.redirect(ctx.youtube.generateAuthUrl());
-  }
-  await next();
 });
 
 app.use(

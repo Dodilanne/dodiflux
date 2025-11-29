@@ -37,7 +37,8 @@
   $utilities: ("background-colors": false));
 
 :root {
-  button {
+  button,
+  [role=button] {
     font-size: smaller;
     padding: 0 calc(var(--pico-spacing) * 0.4);
   }

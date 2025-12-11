@@ -2,6 +2,9 @@ FROM oven/bun:1 AS base
 
 WORKDIR /app
 
+# Create a directory for persistent data
+RUN mkdir -p /app/data
+
 # Install dependencies
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile

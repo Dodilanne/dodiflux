@@ -16,7 +16,7 @@ export function createYoutubeClient() {
     if (tokens.refresh_token) {
       console.log("writing refresh token...");
       try {
-        await Bun.write("refresh.txt", tokens.refresh_token);
+        await Bun.write("data/refresh.txt", tokens.refresh_token);
         console.log("writing refresh token... done");
       } catch (error) {
         console.log("failed to write refresh token", parseError(error).message);
@@ -25,7 +25,7 @@ export function createYoutubeClient() {
     }
   });
 
-  const file = Bun.file("refresh.txt");
+  const file = Bun.file("data/refresh.txt");
   console.log("initializing...");
   const initialization = file
     .exists()

@@ -74,6 +74,7 @@ export function createYoutubeClient() {
     generateAuthUrl: () => {
       return auth.generateAuthUrl({
         access_type: "offline",
+        prompt: "consent", // Force re-issue of refresh token
         scope: ["https://www.googleapis.com/auth/youtube"],
       });
     },

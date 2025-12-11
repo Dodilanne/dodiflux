@@ -365,6 +365,9 @@ const Entry = memo(
               border: none;
             }
           }
+          table table table table table table table {
+            margin-bottom: 0;
+          }
           .save-btn {
             padding: 0.5rem;
             cursor: pointer;
@@ -455,6 +458,19 @@ async function sanitizeContent(rawContent: string, ctx: GlobalContext) {
         span.setAttribute("hx-vals", JSON.stringify({ url }));
         anchor.after(span);
       } catch {}
+    }
+  }
+
+  for (const element of Array.from(doc.querySelectorAll("td"))) {
+    let current: HTMLElement | null = element;
+    while (
+      current &&
+      current.textContent?.trim().length === 0 &&
+      current.children.length === 0
+    ) {
+      const parent: HTMLElement | null = current.parentElement;
+      current.remove();
+      current = parent;
     }
   }
 

@@ -3,6 +3,7 @@
   "scripts": {
     "build:css": "sass --no-source-map static/style.scss static/style.css",
     "build": "bun run build:css",
+    "docker:start": "bun run db:push && bun run src/index.tsx",
     "dev:css": "sass --watch --no-source-map static/style.scss static/style.css",
     "dev:js": "bun run --watch src/index.tsx",
     "dev": "conc \"bun run dev:css\" \"bun run dev:js\"",

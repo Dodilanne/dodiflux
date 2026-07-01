@@ -4,6 +4,7 @@ WORKDIR /app
 
 # Create a directory for persistent data
 RUN mkdir -p /app/data
+RUN touch /app/data/sqlite.db
 
 # Install dependencies
 COPY package.json bun.lock ./
@@ -17,5 +18,4 @@ RUN bun run build
 # Expose port
 EXPOSE 3001
 
-# Run the app
-CMD ["sh", "-c", "bun run db:push && bun run src/index.tsx"]
+ENTRYPOINT ["bun", "run", "docker:start"]

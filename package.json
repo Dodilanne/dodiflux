@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.5",
+    "@libsql/client": "^0.17.4",
     "date-fns": "^4.1.0",
+    "drizzle-orm": "^1.0.0-rc.4",
     "googleapis": "^166.0.0",
     "hono": "^4.10.4",
     "htmx.org": "^2.0.8",
@@ -25,6 +27,7 @@
     "@types/bun": "latest",
     "@types/jsdom": "^27.0.0",
     "concurrently": "^9.2.1",
+    "drizzle-kit": "^1.0.0-rc.4",
     "knip": "^5.67.1",
     "sass": "^1.93.3"
   }

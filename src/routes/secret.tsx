@@ -1,21 +1,18 @@
 import { Hono } from "hono";
+import { isErr, wrap } from "trynot";
 
 export const secretRoute = new Hono();
 
 secretRoute.post("/", async (c) => {
-  const secret = Number(c.req.query("secret"));
-  if (Number.isNaN(secret) || secret < 1 || secret > 10) {
-    return c.html(
-      <li class="error">
-        <p>invalid secret</p>
-        <button
-          type="button"
-          arial-label="Close"
-          onclick="this.closest('li').remove()"
-        />
-      </li>,
-      500,
-    );
+  const value = Number(c.req.query("value"));
+  if (Number.isNaN(value) || value < 1 || value > 10) {
+    return c.html(<ErrorAlert>{new Error("invalid secret")}</ErrorAlert>, 500);
+  }
+
+  const db = c.var.ctx.db;
+  const result = await wrap(db.client.insert(db.records).values({ value }));
+  if (isErr(result)) {
+    return c.html(<ErrorAlert>{result}</ErrorAlert>, 500);
   }
 
   return c.html(
@@ -24,3 +21,16 @@ secretRoute.post("/", async (c) => {
     </div>,
   );
 });
+
+const ErrorAlert = ({ children }: { children: Error }) => {
+  return (
+    <li class="error">
+      <p>{children.message}</p>
+      <button
+        type="button"
+        arial-label="Close"
+        onclick="this.closest('li').remove()"
+      />
+    </li>
+  );
+};

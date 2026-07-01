@@ -7,9 +7,9 @@ import { createGlobalContext, type GlobalContext } from "./global-context";
 import { categoriesRoute } from "./routes/categories";
 import { homeRoute } from "./routes/home";
 import { minifluxRoute } from "./routes/miniflux";
+import { secretRoute } from "./routes/secret";
 import { wallabagRoute } from "./routes/wallabag";
 import { youtubeRoute } from "./routes/youtube";
-import { secretRoute } from "./routes/secret";
 
 declare module "hono" {
   interface ContextVariableMap {

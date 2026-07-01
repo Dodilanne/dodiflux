@@ -18,7 +18,7 @@ export const Secret = () => {
             type="button"
             key={i}
             class={cx("outline", css`margin-bottom: 0;`)}
-            hx-post={`/secret?secret=${i}`}
+            hx-post={`/secret?value=${i + 1}`}
             hx-target="#secret"
           >
             {i + 1}

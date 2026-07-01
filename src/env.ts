@@ -12,5 +12,6 @@ export const $env = z
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
     GOOGLE_OAUTH_REDIRECT: z.string(),
+    DATABASE_URL: z.string(),
   })
-  .parse(Bun.env);
+  .parse(process.env);

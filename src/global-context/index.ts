@@ -1,3 +1,4 @@
+import { createDbClient } from "./db";
 import { createMinifluxClient } from "./miniflux";
 import { createWallabagClient } from "./wallabag";
 import { createYoutubeClient } from "./youtube";
@@ -7,6 +8,7 @@ export function createGlobalContext() {
     miniflux: createMinifluxClient(),
     wallabag: createWallabagClient(),
     youtube: createYoutubeClient(),
+    db: createDbClient(),
   };
 }
 

@@ -6,7 +6,8 @@
     "dev:css": "sass --watch --no-source-map static/style.scss static/style.css",
     "dev:js": "bun run --watch src/index.tsx",
     "dev": "conc \"bun run dev:css\" \"bun run dev:js\"",
-    "lint": "biome check --write --unsafe"
+    "lint": "biome check --write --unsafe",
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.5",

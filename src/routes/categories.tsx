@@ -6,6 +6,7 @@ import type { JSX } from "hono/jsx/jsx-runtime";
 import { JSDOM } from "jsdom";
 import { isErr, parseError, type Result, wrap } from "trynot";
 import z from "zod";
+import type { HeaderProps } from "../components/header";
 import { Layout } from "../components/layout";
 import type { GlobalContext } from "../global-context";
 import { minifluxToGenericEntry } from "../global-context/miniflux";
@@ -104,10 +105,14 @@ categoriesRoute.get(`/saved/entries`, async (c) => {
 
 categoriesRoute.get(`/:category{${idAndTitleRegex}}/entries`, async (c) => {
   const category = idAndTitleSchema.parse(c.req.param("category"));
+  const feed = idAndTitleSchema.optional().parse(c.req.query("feed"));
+
+  let url = `/categories/${category.id}/entries`;
+  if (feed) url = `/feeds/${feed.id}/entries`;
 
   const categoryEntries = wrap(
     c.var.ctx.miniflux
-      .request(`/categories/${category.id}/entries`, {
+      .request(url, {
         params: { status: "unread", direction: "desc" },
         schema: c.var.ctx.miniflux.schemas.entries,
       })
@@ -117,15 +122,21 @@ categoriesRoute.get(`/:category{${idAndTitleRegex}}/entries`, async (c) => {
       })),
   );
 
+  let nav: NonNullable<HeaderProps["nav"]>;
+  if (feed) {
+    nav = [
+      {
+        name: category.title,
+        href: `/categories/${category.id}-${category.title}/entries`,
+      },
+      { name: feed.title },
+    ];
+  } else {
+    nav = [{ name: category.title }];
+  }
+
   return c.render(
-    <Layout
-      header={{
-        nav: [{ name: category.title }],
-      }}
-      footer={{
-        promises: [categoryEntries],
-      }}
-    >
+    <Layout header={{ nav }} footer={{ promises: [categoryEntries] }}>
       <Suspense
         fallback={
           <Fragment>
@@ -143,6 +154,7 @@ categoriesRoute.get(`/:category{${idAndTitleRegex}}/entries`, async (c) => {
         }
       >
         <CategoryEntries
+          withFeedLinks={!feed}
           categoryEntries={categoryEntries}
           actions={(entry) => [
             <button
@@ -162,9 +174,11 @@ categoriesRoute.get(`/:category{${idAndTitleRegex}}/entries`, async (c) => {
 });
 
 const CategoryEntries = async ({
+  withFeedLinks = false,
   categoryEntries,
   actions: createActions,
 }: {
+  withFeedLinks?: boolean;
   categoryEntries: Promise<Result<{ entries: GenericEntry[] }>>;
   actions?: (entry: GenericEntry) => JSX.Element[];
 }) => {
@@ -198,7 +212,15 @@ const CategoryEntries = async ({
               >
                 <p class={css`margin: 0;`}>
                   <small>
-                    {entry.feed}
+                    {withFeedLinks ? (
+                      <a
+                        href={`/categories/${entry.category}/entries?feed=${entry.feedId}-${encodeURIComponent(entry.feed)}`}
+                      >
+                        {entry.feed}
+                      </a>
+                    ) : (
+                      <Fragment>{entry.feed}</Fragment>
+                    )}
                     {entry.publishedAt && " • "}
                     {entry.publishedAt &&
                       formatRelative(entry.publishedAt, new Date())

@@ -30,6 +30,7 @@ export function wallabagToGenericEntry(
     title: entry.title,
     category: "saved",
     feed: entry.domain_name,
+    feedId: 0,
     content: entry.content,
     publishedAt: undefined,
     isStarred: entry.is_starred,

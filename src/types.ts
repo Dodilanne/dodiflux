@@ -3,6 +3,7 @@ export type GenericEntry = {
   title: string;
   category: string;
   feed: string;
+  feedId: number;
   publishedAt: string | undefined;
   content: string;
   isStarred: boolean;

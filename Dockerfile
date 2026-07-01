@@ -14,9 +14,6 @@ COPY . .
 
 RUN bun run build
 
-RUN mkdir -p /app/data
-ENV DB_FILE_NAME=file:/app/data/sqlite.db
-
 # Expose port
 EXPOSE 3001
 

@@ -1,4 +1,4 @@
-import { css, cx } from "hono/css";
+import { css } from "hono/css";
 
 export type HeaderProps = {
   nav?: {
@@ -11,15 +11,12 @@ export type HeaderProps = {
 export const Header = ({ nav }: HeaderProps) => {
   return (
     <header
-      class={cx(
-        "container",
-        css`
+      class={css`
           --pico-nav-link-spacing-vertical: 0rem;
           --pico-nav-element-spacing-vertical: 0rem;
-          padding-bottom: 0;
+          padding-bottom: var(--pico-block-spacing-vertical);
           display: flex;
-        `,
-      )}
+        `}
     >
       <img
         src="/static/favicon.png"

@@ -3,7 +3,7 @@ import type { PropsWithChildren } from "hono/jsx";
 
 export const Shell = ({ children }: PropsWithChildren) => {
   return (
-    <html lang="en">
+    <html lang="en" class={css`height: 100%;`}>
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -28,7 +28,7 @@ export const Shell = ({ children }: PropsWithChildren) => {
         </Style>
         <title>dodiflux</title>
       </head>
-      <body>
+      <body class={css`height: 100%;`}>
         {children}
         <script src="/static/htmx.js" defer />
       </body>

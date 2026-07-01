@@ -9,6 +9,7 @@ import { homeRoute } from "./routes/home";
 import { minifluxRoute } from "./routes/miniflux";
 import { wallabagRoute } from "./routes/wallabag";
 import { youtubeRoute } from "./routes/youtube";
+import { secretRoute } from "./routes/secret";
 
 declare module "hono" {
   interface ContextVariableMap {
@@ -68,6 +69,7 @@ app.route("/categories", categoriesRoute);
 app.route("/miniflux", minifluxRoute);
 app.route("/wallabag", wallabagRoute);
 app.route("/youtube", youtubeRoute);
+app.route("/secret", secretRoute);
 
 export default {
   port: 3001,

@@ -1,3 +1,4 @@
+import { css } from "hono/css";
 import { type PropsWithChildren, Suspense } from "hono/jsx";
 import { isErr, type Result } from "trynot";
 
@@ -5,7 +6,7 @@ export type FooterProps = PropsWithChildren<AlertsProps>;
 
 export const Footer = ({ children, promises }: FooterProps) => {
   return (
-    <footer>
+    <footer class={css`padding-bottom: var(--pico-block-spacing-vertical);`}>
       {children}
       <Suspense fallback="">
         <Alerts promises={promises} />

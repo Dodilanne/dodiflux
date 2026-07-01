@@ -354,7 +354,6 @@ const Entry = memo(
             width: 100%;
             height: 100%;
             aspect-ratio: 16 / 9;
-            max-width: 700px;
             margin-bottom: 1rem;
           }
           table {

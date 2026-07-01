@@ -2,9 +2,12 @@ FROM oven/bun:1 AS base
 
 WORKDIR /app
 
+# Install sqlite3 CLI
+RUN apt-get update && apt-get install -y --no-install-recommends sqlite3 \
+    && rm -rf /var/lib/apt/lists/*
+
 # Create a directory for persistent data
 RUN mkdir -p /app/data
-RUN touch /app/data/sqlite.db
 
 # Install dependencies
 COPY package.json bun.lock ./

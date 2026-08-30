@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { isErr, wrap } from "trynot";
+import { errorAlert } from "../components/error";
 
 export const minifluxRoute = new Hono();
 
@@ -17,17 +18,7 @@ minifluxRoute.post("/entries/:entryId/read", async (c) => {
   );
 
   if (isErr(result)) {
-    return c.html(
-      <li class="error">
-        <p>{result.message}</p>
-        <button
-          type="button"
-          arial-label="Close"
-          onclick="this.closest('li').remove()"
-        />
-      </li>,
-      500,
-    );
+    return errorAlert(c, result);
   }
 
   c.header("datastar-mode", "remove");

@@ -1,6 +1,7 @@
 import { css } from "hono/css";
 import { type PropsWithChildren, Suspense } from "hono/jsx";
 import { isErr, type Result } from "trynot";
+import { ErrorAlert } from "./error";
 
 export type FooterProps = PropsWithChildren<AlertsProps>;
 
@@ -25,17 +26,7 @@ const Alerts = async ({ promises }: AlertsProps) => {
     <article id="alerts" class="alert-container">
       <ol>
         {results.map(
-          (result) =>
-            isErr(result) && (
-              <li class="error">
-                <p>{result.message}</p>
-                <button
-                  type="button"
-                  aria-label="Close"
-                  onclick="this.closest('li').remove()"
-                />
-              </li>
-            ),
+          (result) => isErr(result) && <ErrorAlert error={result} />,
         )}
       </ol>
     </article>

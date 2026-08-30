@@ -8,15 +8,6 @@ export const Shell = ({ children }: PropsWithChildren) => {
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="color-scheme" content="light dark" />
-        <meta
-          name="htmx-config"
-          content='{
-            "responseHandling":[
-              {"code": "[23]..", "swap": true},
-              {"code": "[45]..", "swap": true, "error": true, "target": "#alerts ol", "swapOverride": "beforeend"}
-            ]
-          }'
-        />
         <link rel="stylesheet" href="/static/style.css" />
         <link rel="icon" href="/static/favicon.png" />
         <Style>

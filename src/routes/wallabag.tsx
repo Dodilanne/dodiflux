@@ -2,6 +2,7 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { isErr, wrap } from "trynot";
 import z from "zod";
+import { errorAlert } from "../components/error";
 
 export const wallabagRoute = new Hono();
 
@@ -18,17 +19,7 @@ wallabagRoute.post("/entries/:entryId/read", async (c) => {
   );
 
   if (isErr(result)) {
-    return c.html(
-      <li class="error">
-        <p>{result.message}</p>
-        <button
-          type="button"
-          arial-label="Close"
-          onclick="this.closest('li').remove()"
-        />
-      </li>,
-      500,
-    );
+    return errorAlert(c, result);
   }
 
   c.header("datastar-mode", "remove");
@@ -49,17 +40,7 @@ wallabagRoute.post("/entries/:entryId/star", async (c) => {
   );
 
   if (isErr(result)) {
-    return c.html(
-      <li class="error">
-        <p>{result.message}</p>
-        <button
-          type="button"
-          arial-label="Close"
-          onclick="this.closest('li').remove()"
-        />
-      </li>,
-      500,
-    );
+    return errorAlert(c, result);
   }
 
   return c.html(
@@ -88,17 +69,7 @@ wallabagRoute.post("/entries/:entryId/unstar", async (c) => {
   );
 
   if (isErr(result)) {
-    return c.html(
-      <li class="error">
-        <p>{result.message}</p>
-        <button
-          type="button"
-          arial-label="Close"
-          onclick="this.closest('li').remove()"
-        />
-      </li>,
-      500,
-    );
+    return errorAlert(c, result);
   }
 
   return c.html(
@@ -136,17 +107,7 @@ wallabagRoute.post(
     );
 
     if (isErr(result)) {
-      return c.html(
-        <li class="error">
-          <p>{result.message}</p>
-          <button
-            type="button"
-            arial-label="Close"
-            onclick="this.closest('li').remove()"
-          />
-        </li>,
-        500,
-      );
+      return errorAlert(c, result);
     }
 
     return c.html(
@@ -167,17 +128,7 @@ wallabagRoute.delete("/entries/:entryId", async (c) => {
   );
 
   if (isErr(result)) {
-    return c.html(
-      <li class="error">
-        <p>{result.message}</p>
-        <button
-          type="button"
-          arial-label="Close"
-          onclick="this.closest('li').remove()"
-        />
-      </li>,
-      500,
-    );
+    return errorAlert(c, result);
   }
 
   c.header("datastar-mode", "remove");

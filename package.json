@@ -17,7 +17,6 @@
     "drizzle-orm": "^1.0.0-rc.4",
     "googleapis": "^166.0.0",
     "hono": "^4.10.4",
-    "htmx.org": "^2.0.8",
     "jsdom": "^27.1.0",
     "trynot": "^0.0.3",
     "up-fetch": "^2.5.0",

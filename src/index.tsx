@@ -37,13 +37,6 @@ app.get("/google/oauth/redirect", async (c) => {
 });
 
 app.use(
-  "/static/htmx.js",
-  serveStatic({
-    path: "./node_modules/htmx.org/dist/htmx.min.js",
-  }),
-);
-
-app.use(
   "/static/*",
   serveStatic({
     root: "./",

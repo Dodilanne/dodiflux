@@ -64,9 +64,10 @@ wallabagRoute.post("/entries/:entryId/star", async (c) => {
   return c.html(
     <button
       type="button"
-      class={cx("primary", css`margin-bottom: 0;`)}
-      hx-post={`/wallabag/entries/${entryId}/unstar`}
-      hx-swap="outerHTML"
+      class="primary"
+      style="margin-bottom: 0;"
+      id={`entry-${entryId}-star`}
+      data-on:click={`@post("/wallabag/entries/${entryId}/unstar")`}
     >
       star
     </button>,
@@ -102,9 +103,10 @@ wallabagRoute.post("/entries/:entryId/unstar", async (c) => {
   return c.html(
     <button
       type="button"
-      class={cx("secondary", css`margin-bottom: 0;`)}
-      hx-post={`/wallabag/entries/${entryId}/star`}
-      hx-swap="outerHTML"
+      class="secondary"
+      style="margin-bottom: 0;"
+      id={`entry-${entryId}-star`}
+      data-on:click={`@post("/wallabag/entries/${entryId}/star")`}
     >
       star
     </button>,

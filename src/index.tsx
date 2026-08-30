@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { serveStatic } from "hono/bun";
+import { Fragment } from "hono/jsx";
 import { jsxRenderer } from "hono/jsx-renderer";
 import { Shell } from "./components/shell";
 import { createGlobalContext, type GlobalContext } from "./global-context";
@@ -44,8 +45,10 @@ app.use(
 app.get(
   "*",
   jsxRenderer(
-    ({ children }) => {
-      return <Shell>{children}</Shell>;
+    ({ children }, c) => {
+      const isDatastar = c.req.header("Datastar-Request") === "true";
+      const Container = isDatastar ? Fragment : Shell;
+      return <Container>{children}</Container>;
     },
     {
       stream: true,

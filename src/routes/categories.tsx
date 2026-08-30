@@ -78,12 +78,10 @@ categoriesRoute.get(`/saved/entries`, async (c) => {
             </button>,
             <button
               type="button"
-              class={cx(
-                entry.isStarred ? "primary" : "secondary",
-                css`margin-bottom: 0;`,
-              )}
-              hx-post={`/wallabag/entries/${entry.id}/${entry.isStarred ? "unstar" : "star"}`}
-              hx-swap="outerHTML"
+              style="margin-bottom: 0;"
+              class={entry.isStarred ? "primary" : "secondary"}
+              id={`entry-${entry.id}-star`}
+              data-on:click={`@post("/wallabag/entries/${entry.id}/${entry.isStarred ? "unstar" : "star"}")`}
             >
               star
             </button>,

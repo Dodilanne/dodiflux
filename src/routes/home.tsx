@@ -25,7 +25,7 @@ homeRoute.get("/", (c) => {
   );
 
   return c.render(
-    <Layout secret footer={{ promises: [categories, saved] }}>
+    <Layout footer={{ promises: [categories, saved] }}>
       <Suspense
         fallback={
           <Fragment>

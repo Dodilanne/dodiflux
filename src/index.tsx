@@ -1,13 +1,11 @@
 import { Hono } from "hono";
 import { serveStatic } from "hono/bun";
-import { Fragment } from "hono/jsx";
 import { jsxRenderer } from "hono/jsx-renderer";
 import { Shell } from "./components/shell";
 import { createGlobalContext, type GlobalContext } from "./global-context";
 import { categoriesRoute } from "./routes/categories";
 import { homeRoute } from "./routes/home";
 import { minifluxRoute } from "./routes/miniflux";
-import { secretRoute } from "./routes/secret";
 import { wallabagRoute } from "./routes/wallabag";
 import { youtubeRoute } from "./routes/youtube";
 
@@ -46,10 +44,8 @@ app.use(
 app.get(
   "*",
   jsxRenderer(
-    ({ children }, c) => {
-      const isBoosted = c.req.header("hx-boosted") === "true";
-      const Container = isBoosted ? Fragment : Shell;
-      return <Container>{children}</Container>;
+    ({ children }) => {
+      return <Shell>{children}</Shell>;
     },
     {
       stream: true,
@@ -62,7 +58,6 @@ app.route("/categories", categoriesRoute);
 app.route("/miniflux", minifluxRoute);
 app.route("/wallabag", wallabagRoute);
 app.route("/youtube", youtubeRoute);
-app.route("/secret", secretRoute);
 
 export default {
   port: 3001,

@@ -26,17 +26,13 @@ export function createYoutubeClient() {
   });
 
   const file = Bun.file("data/refresh.txt");
-  console.log("initializing...");
   const initialization = file
     .exists()
     .then((exists) => {
-      console.log("exists?", exists);
       if (exists) {
-        console.log("reading...");
         return file
           .text()
           .then((refresh_token) => {
-            console.log("read", refresh_token);
             auth.setCredentials({ refresh_token });
           })
           .catch((error) => {

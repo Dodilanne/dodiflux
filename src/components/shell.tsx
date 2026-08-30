@@ -30,7 +30,8 @@ export const Shell = ({ children }: PropsWithChildren) => {
       </head>
       <body class={css`height: 100%;`}>
         {children}
-        <script src="/static/htmx.js" defer />
+        <script src="/static/datastar.min.js" defer />
+        <script src="/static/htmx.min.js" defer />
       </body>
     </html>
   );

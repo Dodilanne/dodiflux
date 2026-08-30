@@ -30,5 +30,7 @@ minifluxRoute.post("/entries/:entryId/read", async (c) => {
     );
   }
 
+  c.header("datastar-mode", "remove");
+  c.header("datastar-selector", `#entry-${entryId}`);
   return c.html(<div>ok</div>);
 });

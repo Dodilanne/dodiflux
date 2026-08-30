@@ -1,6 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
-import { css, cx } from "hono/css";
 import { isErr, wrap } from "trynot";
 import z from "zod";
 
@@ -32,6 +31,8 @@ wallabagRoute.post("/entries/:entryId/read", async (c) => {
     );
   }
 
+  c.header("datastar-mode", "remove");
+  c.header("datastar-selector", `#entry-${entryId}`);
   return c.html(<div>ok</div>);
 });
 
@@ -115,9 +116,15 @@ wallabagRoute.post("/entries/:entryId/unstar", async (c) => {
 
 wallabagRoute.post(
   "/entries",
-  zValidator("form", z.object({ url: z.string() })),
+  zValidator(
+    "json",
+    z.object({
+      targetId: z.string(),
+      url: z.string(),
+    }),
+  ),
   async (c) => {
-    const { url } = c.req.valid("form");
+    const { url, targetId } = c.req.valid("json");
 
     const result = await wrap(
       c.var.ctx.wallabag.request("entries", {
@@ -142,7 +149,11 @@ wallabagRoute.post(
       );
     }
 
-    return c.html(<span class="save-btn saved">✦</span>);
+    return c.html(
+      <span id={targetId} class="save-btn saved">
+        ✦
+      </span>,
+    );
   },
 );
 
@@ -169,5 +180,7 @@ wallabagRoute.delete("/entries/:entryId", async (c) => {
     );
   }
 
+  c.header("datastar-mode", "remove");
+  c.header("datastar-selector", `#entry-${entryId}`);
   return c.html(<div>ok</div>);
 });

@@ -12,12 +12,9 @@ export function createYoutubeClient() {
   const client = google.youtube({ version: "v3", auth: auth });
 
   auth.on("tokens", async (tokens) => {
-    console.log(JSON.stringify({ tokens }, null, 2));
     if (tokens.refresh_token) {
-      console.log("writing refresh token...");
       try {
         await Bun.write("data/refresh.txt", tokens.refresh_token);
-        console.log("writing refresh token... done");
       } catch (error) {
         console.log("failed to write refresh token", parseError(error).message);
         throw error;
@@ -49,12 +46,10 @@ export function createYoutubeClient() {
   return {
     client,
     isAuthenticated: async () => {
-      console.log("awaiting initialization...");
       await initialization.catch((error) => {
         console.log("initialization failed:", parseError(error).message);
         return undefined;
       });
-      console.log("awaiting initialization... done");
       const result = await wrap(auth.getAccessToken());
       if (isErr(result)) {
         console.log("failed to retrieve access token:", result.message);
@@ -64,7 +59,6 @@ export function createYoutubeClient() {
         console.log("no access token", JSON.stringify({ result }, null, 2));
         return false;
       }
-      console.log("all good");
       return true;
     },
     generateAuthUrl: () => {

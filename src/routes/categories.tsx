@@ -70,9 +70,7 @@ categoriesRoute.get(`/saved/entries`, async (c) => {
             <button
               type="button"
               class={cx("secondary", css`margin-bottom: 0;`)}
-              hx-delete={`/wallabag/entries/${entry.id}`}
-              hx-target="closest article"
-              hx-swap="delete"
+              data-on:click={`@delete("/wallabag/entries/${entry.id}")`}
             >
               delete
             </button>,
@@ -88,9 +86,7 @@ categoriesRoute.get(`/saved/entries`, async (c) => {
             <button
               type="button"
               class={cx("secondary", css`margin-bottom: 0;`)}
-              hx-post={`/wallabag/entries/${entry.id}/read`}
-              hx-target="closest article"
-              hx-swap="delete"
+              data-on:click={`@post("/wallabag/entries/${entry.id}/read")`}
             >
               read
             </button>,
@@ -158,9 +154,7 @@ categoriesRoute.get(`/:category{${idAndTitleRegex}}/entries`, async (c) => {
             <button
               type="button"
               class={cx("secondary", css` margin-bottom: 0;`)}
-              hx-post={`/miniflux/entries/${entry.id}/read`}
-              hx-target="closest article"
-              hx-swap="delete"
+              data-on:click={`@post("/miniflux/entries/${entry.id}/read")`}
             >
               read
             </button>,
@@ -197,7 +191,7 @@ const CategoryEntries = async ({
       {result.entries.map((entry) => {
         const actions = createActions?.(entry) ?? [];
         return (
-          <article>
+          <article id={`entry-${entry.id}`}>
             <hgroup style={{ marginBottom: 0 }}>
               <a
                 class={cx("contrast", css`text-decoration: none;`)}
@@ -447,7 +441,9 @@ async function sanitizeContent(rawContent: string, ctx: GlobalContext) {
     }
   }
 
-  for (const anchor of Array.from(doc.querySelectorAll("a"))) {
+  for (const [anchorIdx, anchor] of Array.from(
+    doc.querySelectorAll("a").entries(),
+  )) {
     let firstChild = anchor.firstChild;
     if (firstChild?.nodeValue?.trim() === "") {
       firstChild = firstChild?.nextSibling;
@@ -470,11 +466,13 @@ async function sanitizeContent(rawContent: string, ctx: GlobalContext) {
           }
         }
         const span = doc.createElement("span");
+        span.id = `save-btn-${anchorIdx}`;
         span.classList.add("save-btn");
         span.textContent = "✦";
-        span.setAttribute("hx-swap", "outerHTML");
-        span.setAttribute("hx-post", "/wallabag/entries");
-        span.setAttribute("hx-vals", JSON.stringify({ url }));
+        span.setAttribute(
+          "data-on:click",
+          `@post("/wallabag/entries", { payload: { targetId: "${span.id}", url: "${url}" } })`,
+        );
         anchor.after(span);
       } catch {}
     }
@@ -528,14 +526,17 @@ async function sanitizeContent(rawContent: string, ctx: GlobalContext) {
       )?.rating;
       const isLiked = rating === "like";
       const button = doc.createElement("button");
+      button.id = "button-like";
       button.style.display = "block";
       if (isLiked) {
         button.textContent = "liked";
       } else {
         button.textContent = "like";
         button.classList.add("secondary");
-        button.setAttribute("hx-post", `/youtube/like/${videoId}`);
-        button.setAttribute("hx-swap", "outerHTML");
+        button.setAttribute(
+          "data-on:click",
+          `@post("/youtube/like/${videoId}")`,
+        );
       }
       iframe.after(button);
     }

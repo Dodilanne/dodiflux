@@ -29,9 +29,25 @@ homeRoute.get("/", (c) => {
       <Suspense
         fallback={
           <Fragment>
-            {["news", "podcast", "tech", "youtube"].map((category) => (
-              <article>{category}</article>
-            ))}
+            {["articles", "news", "podcast", "tech", "youtube"].map(
+              (category) => (
+                <article>
+                  <span class={css`color: var(--pico-contrast)`}>
+                    {category}
+                  </span>
+                  <br />
+                  <small
+                    class={css`
+                           text-decoration: underline;
+                           color: var(--pico-secondary);
+                           text-decoration-color: var(--pico-secondary-underline);
+                         `}
+                  >
+                    feeds
+                  </small>
+                </article>
+              ),
+            )}
           </Fragment>
         }
       >
@@ -60,14 +76,32 @@ const Categories = async (props: {
           class={css`
             display: flex;
             justify-content: space-between;
+            align-items: flex-end;
           `}
         >
-          <a
-            class={cx("contrast", css`text-decoration: none;`)}
-            href={`/categories/${category.id}-${category.title}/entries`}
+          <div
+            class={css`
+              display: flex;
+              flex-direction: column;
+            `}
           >
-            <span>{category.title}</span>
-          </a>
+            <a
+              class={cx("contrast", css`text-decoration: none;`)}
+              href={`/categories/${category.id}-${category.title}/entries`}
+            >
+              {category.title}
+            </a>
+            <p class={css`margin: 0;`}>
+              <small>
+                <a
+                  class="secondary"
+                  href={`/categories/${category.id}-${category.title}/feeds`}
+                >
+                  feeds
+                </a>
+              </small>
+            </p>
+          </div>
           <span>{category.total_unread}</span>
         </article>
       ))}

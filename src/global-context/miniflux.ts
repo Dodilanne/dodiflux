@@ -28,6 +28,12 @@ export const minifluxSchemas = {
     feed_count: z.number(),
     total_unread: z.number(),
   }),
+  feeds: z.array(
+    z.object({
+      title: z.string(),
+      id: z.number(),
+    }),
+  ),
   entries: z.object({
     total: z.number(),
     entries: z.array(minifluxEntrySchema),

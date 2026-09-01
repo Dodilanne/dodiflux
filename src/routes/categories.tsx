@@ -9,7 +9,10 @@ import z from "zod";
 import type { HeaderProps } from "../components/header";
 import { Layout } from "../components/layout";
 import type { GlobalContext } from "../global-context";
-import { minifluxToGenericEntry } from "../global-context/miniflux";
+import {
+  minifluxSchemas,
+  minifluxToGenericEntry,
+} from "../global-context/miniflux";
 import { wallabagToGenericEntry } from "../global-context/wallabag";
 import type { GenericEntry } from "../types";
 
@@ -97,6 +100,46 @@ categoriesRoute.get(`/saved/entries`, async (c) => {
   );
 });
 
+categoriesRoute.get(`/:category{${idAndTitleRegex}}/feeds`, async (c) => {
+  const category = idAndTitleSchema.parse(c.req.param("category"));
+
+  const feeds = wrap(
+    c.var.ctx.miniflux
+      .request(`/categories/${category.id}/feeds`, {
+        params: { order: "id", directioni: "asc" },
+        schema: c.var.ctx.miniflux.schemas.feeds,
+      })
+      .then((data) => data.sort((a, b) => a.title.localeCompare(b.title))),
+  );
+
+  return c.render(
+    <Layout
+      header={{
+        nav: [
+          {
+            name: category.title,
+            href: `/categories/${category.id}-${category.title}/entries`,
+          },
+          { name: "feeds" },
+        ],
+      }}
+      footer={{ promises: [feeds] }}
+    >
+      <Suspense
+        fallback={
+          <Fragment>
+            {Array.from({ length: 4 }, () => (
+              <article class={css`color: transparent;`}>entry</article>
+            ))}
+          </Fragment>
+        }
+      >
+        <Feeds category={c.req.param("category")} feeds={feeds} />
+      </Suspense>
+    </Layout>,
+  );
+});
+
 categoriesRoute.get(`/:category{${idAndTitleRegex}}/entries`, async (c) => {
   const category = idAndTitleSchema.parse(c.req.param("category"));
   const feed = idAndTitleSchema.optional().parse(c.req.query("feed"));
@@ -164,6 +207,41 @@ categoriesRoute.get(`/:category{${idAndTitleRegex}}/entries`, async (c) => {
     </Layout>,
   );
 });
+
+const Feeds = async ({
+  category,
+  feeds,
+}: {
+  category: string;
+  feeds: Promise<Result<z.infer<typeof minifluxSchemas.feeds>>>;
+}) => {
+  const result = await feeds;
+
+  if (isErr(result)) {
+    return <Fragment />;
+  }
+
+  if (result.length === 0) {
+    return (
+      <article class={css`color: var(--pico-muted-color)`}>No feeds</article>
+    );
+  }
+
+  return (
+    <Fragment>
+      {result.map((feed) => (
+        <article>
+          <a
+            class={cx("contrast", css`text-decoration: none;`)}
+            href={`/categories/${category}/entries?feed=${feed.id}-${encodeURIComponent(feed.title)}`}
+          >
+            {feed.title}
+          </a>
+        </article>
+      ))}
+    </Fragment>
+  );
+};
 
 const CategoryEntries = async ({
   withFeedLinks = false,

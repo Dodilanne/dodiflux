@@ -71,40 +71,46 @@ const Categories = async (props: {
 
   return (
     <Fragment>
-      {categories.map((category) => (
-        <article
-          class={css`
+      {categories.map((category) => {
+        const unreadCount = category.total_unread;
+        return (
+          <article
+            class={cx(
+              css`
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-          `}
-        >
-          <div
-            class={css`
+          `,
+              unreadCount === 0 && css`opacity: 0.5;`,
+            )}
+          >
+            <div
+              class={css`
               display: flex;
               flex-direction: column;
             `}
-          >
-            <a
-              class={cx("contrast", css`text-decoration: none;`)}
-              href={`/categories/${category.id}-${category.title}/entries`}
             >
-              {category.title}
-            </a>
-            <p class={css`margin: 0;`}>
-              <small>
-                <a
-                  class="secondary"
-                  href={`/categories/${category.id}-${category.title}/feeds`}
-                >
-                  feeds
-                </a>
-              </small>
-            </p>
-          </div>
-          <span>{category.total_unread}</span>
-        </article>
-      ))}
+              <a
+                class={cx("contrast", css`text-decoration: none;`)}
+                href={`/categories/${category.id}-${category.title}/entries`}
+              >
+                {category.title}
+              </a>
+              <p class={css`margin: 0;`}>
+                <small>
+                  <a
+                    class="secondary"
+                    href={`/categories/${category.id}-${category.title}/feeds`}
+                  >
+                    feeds
+                  </a>
+                </small>
+              </p>
+            </div>
+            <span>{unreadCount}</span>
+          </article>
+        );
+      })}
     </Fragment>
   );
 };

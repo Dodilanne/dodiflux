@@ -24,7 +24,11 @@ youtubeRoute.post("like/:videoId", async (c) => {
     return c.text(res.message, 500);
   }
   return c.html(
-    <button id="button-like" type="button" style="display: block; margin-bottom: 0;">
+    <button
+      id="button-like"
+      type="button"
+      style="display: block; margin-bottom: 0;"
+    >
       liked
     </button>,
   );

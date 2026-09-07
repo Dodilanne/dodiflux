@@ -10,7 +10,7 @@ import type { HeaderProps } from "../components/header";
 import { Layout } from "../components/layout";
 import type { GlobalContext } from "../global-context";
 import {
-  minifluxSchemas,
+  type minifluxSchemas,
   minifluxToGenericEntry,
 } from "../global-context/miniflux";
 import { wallabagToGenericEntry } from "../global-context/wallabag";
@@ -104,12 +104,16 @@ categoriesRoute.get(`/:category{${idAndTitleRegex}}/feeds`, async (c) => {
   const category = idAndTitleSchema.parse(c.req.param("category"));
 
   const feeds = wrap(
-    c.var.ctx.miniflux
-      .request(`/categories/${category.id}/feeds`, {
-        params: { order: "id", directioni: "asc" },
-        schema: c.var.ctx.miniflux.schemas.feeds,
-      })
-      .then((data) => data.sort((a, b) => a.title.localeCompare(b.title))),
+    c.var.ctx.miniflux.request(`/categories/${category.id}/feeds`, {
+      params: { order: "id", directioni: "asc" },
+      schema: c.var.ctx.miniflux.schemas.feeds,
+    }),
+  );
+
+  const counters = wrap(
+    c.var.ctx.miniflux.request("/feeds/counters", {
+      schema: c.var.ctx.miniflux.schemas.counters,
+    }),
   );
 
   return c.render(
@@ -123,7 +127,7 @@ categoriesRoute.get(`/:category{${idAndTitleRegex}}/feeds`, async (c) => {
           { name: "feeds" },
         ],
       }}
-      footer={{ promises: [feeds] }}
+      footer={{ promises: [feeds, counters] }}
     >
       <Suspense
         fallback={
@@ -134,7 +138,11 @@ categoriesRoute.get(`/:category{${idAndTitleRegex}}/feeds`, async (c) => {
           </Fragment>
         }
       >
-        <Feeds category={c.req.param("category")} feeds={feeds} />
+        <Feeds
+          category={c.req.param("category")}
+          feeds={feeds}
+          counters={counters}
+        />
       </Suspense>
     </Layout>,
   );
@@ -211,13 +219,16 @@ categoriesRoute.get(`/:category{${idAndTitleRegex}}/entries`, async (c) => {
 const Feeds = async ({
   category,
   feeds,
+  counters,
 }: {
   category: string;
   feeds: Promise<Result<z.infer<typeof minifluxSchemas.feeds>>>;
+  counters: Promise<Result<z.infer<typeof minifluxSchemas.counters>>>;
 }) => {
   const result = await feeds;
+  const resolvedCounters = await counters;
 
-  if (isErr(result)) {
+  if (isErr(result) || isErr(resolvedCounters)) {
     return <Fragment />;
   }
 
@@ -229,16 +240,29 @@ const Feeds = async ({
 
   return (
     <Fragment>
-      {result.map((feed) => (
-        <article>
-          <a
-            class={cx("contrast", css`text-decoration: none;`)}
-            href={`/categories/${category}/entries?feed=${feed.id}-${encodeURIComponent(feed.title)}`}
+      {result.map((feed) => {
+        const unreadCount = resolvedCounters.unreads[feed.id] ?? 0;
+        return (
+          <article
+            class={cx(
+              css`
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+          `,
+              unreadCount === 0 && css`opacity: 0.5;`,
+            )}
           >
-            {feed.title}
-          </a>
-        </article>
-      ))}
+            <a
+              class={cx("contrast", css`text-decoration: none;`)}
+              href={`/categories/${category}/entries?feed=${feed.id}-${encodeURIComponent(feed.title)}`}
+            >
+              {feed.title}
+            </a>
+            <span>{unreadCount}</span>
+          </article>
+        );
+      })}
     </Fragment>
   );
 };

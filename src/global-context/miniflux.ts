@@ -34,6 +34,10 @@ export const minifluxSchemas = {
       id: z.number(),
     }),
   ),
+  counters: z.object({
+    reads: z.record(z.string(), z.number()),
+    unreads: z.record(z.string(), z.number()),
+  }),
   entries: z.object({
     total: z.number(),
     entries: z.array(minifluxEntrySchema),
